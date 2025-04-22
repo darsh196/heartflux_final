@@ -17,13 +17,6 @@
             <form @submit.prevent="registerUser">
                 <input type="text" v-model="name" placeholder="Enter username" required>
                 <input type="email" v-model="email" placeholder="Enter your email address" required>
-                <input type="number" v-model="age" placeholder="Enter your age" required>
-                <select v-model="gender" required>
-                    <option value="" disabled selected>Enter your gender</option>
-                    <option value="male">Male</option>
-                    <option value="female">Female</option>
-                    <option value="other">Other</option>
-                </select>
                 <input type="password" v-model="password" placeholder="Enter your password" required>
                 <input type="password" v-model="confirmPassword" placeholder="Enter confirm password" required>
                 <p v-if="passwordMismatch" class="error-message">Passwords do not match</p>
@@ -55,8 +48,6 @@
                         const response = await axios.post("https://heartflux.onrender.com/signup", {
                             name: this.name,
                             email: this.email,
-                            age: this.age,
-                            gender: this.gender,
                             password: this.password
                         });
                         console.log("Signup Successful, Token:", response.data.access_token); // Debugging
