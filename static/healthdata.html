@@ -125,7 +125,7 @@
                     const token = localStorage.getItem("token");
                     if (!token) return;
 
-                    axios.get("http://127.0.0.1:8000/health-history", {
+                    axios.get("https://heartflux.onrender.com/health-history", {
                         headers: {
                             Authorization: `Bearer ${token}`
                         }
@@ -156,7 +156,7 @@
                         return;
                     }
 
-                    axios.post("http://127.0.0.1:8000/submit-health-data", {
+                    axios.post("https://heartflux.onrender.com/submit-health-data", {
                         age: this.age,
                         gender: this.gender,
                         height: this.height,
