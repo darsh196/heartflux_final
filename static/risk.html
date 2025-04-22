@@ -117,7 +117,7 @@
                     this.riskPercent = null;
 
                     try {
-                        const response = await axios.get("http://127.0.0.1:8000/predict-risk", {
+                        const response = await axios.get("https://heartflux.onrender.com/predict-risk", {
                             headers: {
                                 Authorization: `Bearer ${token}`
                             }
@@ -164,10 +164,10 @@
                     const token = localStorage.getItem("token");
 
                     const [riskRes, healthRes] = await Promise.all([
-                        axios.get("http://127.0.0.1:8000/risk-history", {
+                        axios.get("https://heartflux.onrender.com/risk-history", {
                             headers: { Authorization: `Bearer ${token}` }
                         }),
-                        axios.get("http://127.0.0.1:8000/health-history", {
+                        axios.get("https://heartflux.onrender.com/health-history", {
                             headers: { Authorization: `Bearer ${token}` }
                         })
                     ]);
