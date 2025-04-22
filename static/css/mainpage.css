@@ -1,0 +1,188 @@
+/* Global Styles 
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #ffcccc;
+    text-align: center;
+}
+*/
+
+body{
+	font-family: Arial, sans-serif;
+    text-align:center;
+  	background-image: url("/images/heart.png");
+  	background-repeat: no-repeat;
+  	/* Background image is centered vertically and horizontally at all times */
+	background-position: center center;
+
+/* Background image doesn't tile */
+	background-repeat: no-repeat;
+
+/* Background image is fixed in the viewport so that it doesn't move when
+the content's height is greater than the image's height */
+	background-attachment: fixed;
+
+/* This is what makes the background image rescale based
+on the container's size */
+	background-size: cover;
+
+}
+
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.logout-btn {
+    background-color: red;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+    margin:10px;
+}
+
+/* Hover effect */
+.logout-btn:hover {
+    background-color: brown;
+}
+
+h3 {
+    color:brown;
+}
+
+/* Main container to push footer to the bottom */
+#app {
+    flex: 1; /* Takes up remaining space */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+/* Navbar */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: black;
+}
+
+.nav-links {
+    display: flex;
+    padding:10px;
+    gap:30px;
+}
+
+.nav-links a:hover {
+    color:red;
+}
+
+.nav-links a.active{
+    color: red;
+}
+
+.navbar a {
+    color: white;
+    text-decoration: none;
+}
+
+/* Logo */
+.logo img {
+    height: 80px; /* Adjust size as needed */
+    display: block;
+}
+
+.greeting {
+    padding:0px;
+    margin:0px;
+}
+
+/* Profile Button */
+.profile {
+    background-color: red;
+    padding: 20px;
+    color: white;
+    border-radius: 50%;
+    cursor: pointer;
+    margin: 5px;
+}
+
+.profile:hover{
+    background-color: brown;
+}
+
+/* Main Content */
+.main-content {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 0px;
+    flex-wrap: wrap;
+}
+/*
+.content-box {
+    background-color: brown;
+    color: white;
+    padding: 5%;
+    width: 20%;
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.3s ease, background-color 0.3s ease;
+}*/
+
+.content-link {
+    text-decoration: none;
+    width: 20%;
+    padding: 5%;
+    transition: transform 0.3s ease, background-color 0.3s ease;
+    background-color: brown;
+    color: white;
+    text-align: center;
+    cursor: pointer;
+}
+
+.content-link:hover {
+    transform: scale(1.10);
+    background-color: #8B0000;
+}
+
+.content-box {
+    /* no size or layout styles needed */
+}
+
+/* Footer */
+.footer {
+    background-color: black;
+    color: white;
+    padding: 20px;
+    margin-top: 20px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .navbar {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .nav-links {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .main-content {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .content-link {
+        width: 80%;
+    }
+}

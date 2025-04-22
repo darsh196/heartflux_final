@@ -1,0 +1,89 @@
+/* General Styles 
+body {
+    font-family: Arial, sans-serif;
+    background-color: #ffcccc;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+}
+*/
+
+body{
+	font-family: Arial, sans-serif;
+    text-align:center;
+  	background-image: url("/images/heart.png");
+  	background-repeat: no-repeat;
+  	/* Background image is centered vertically and horizontally at all times */
+	background-position: center center;
+
+/* Background image doesn't tile */
+	background-repeat: no-repeat;
+
+/* Background image is fixed in the viewport so that it doesn't move when
+the content's height is greater than the image's height */
+	background-attachment: fixed;
+
+/* This is what makes the background image rescale based
+on the container's size */
+	background-size: cover;
+
+}
+
+/* Sign-Up Container */
+.signup-container {
+    width: 100%;
+    max-width: 400px;
+    padding: 20px;
+    margin: 50px auto;
+}
+
+h1{
+    color:#a80a38;
+}
+
+h2 {
+    color: #333;
+}
+
+/* Input Fields */
+input, select {
+    width: 100%;
+    padding: 10px;
+    margin: 8px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+/* Button */
+button {
+    width: 100%;
+    padding: 10px;
+    background-color: brown;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #8B0000;
+}
+
+/* Link */
+p a {
+    color: brown;
+    text-decoration: none;
+}
+
+p a:hover {
+    text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 500px) {
+    .signup-container {
+        width: 90%;
+        padding: 15px;
+    }
+}

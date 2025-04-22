@@ -1,0 +1,172 @@
+body{
+	font-family: Arial, sans-serif;
+    text-align:center;
+  	background-image: url("/images/heart.png");
+  	background-repeat: no-repeat;
+  	/* Background image is centered vertically and horizontally at all times */
+	background-position: center center;
+
+/* Background image doesn't tile */
+	background-repeat: no-repeat;
+
+/* Background image is fixed in the viewport so that it doesn't move when
+the content's height is greater than the image's height */
+	background-attachment: fixed;
+
+/* This is what makes the background image rescale based
+on the container's size */
+	background-size: cover;
+
+}
+
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.logout-btn {
+    background-color: red;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+    margin:10px;
+}
+
+/* Hover effect */
+.logout-btn:hover {
+    background-color: brown;
+}
+
+h3 {
+    color:brown;
+}
+
+/* Main container to push footer to the bottom */
+#app {
+    flex: 1; /* Takes up remaining space */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+/* Navbar */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: black;
+}
+
+.nav-links {
+    display: flex;
+    padding:10px;
+    gap:30px;
+}
+
+.nav-links a:hover {
+    color:red;
+}
+
+.nav-links a.active{
+    color: red;
+}
+
+.navbar a {
+    color: white;
+    text-decoration: none;
+}
+
+/* Logo */
+.logo img {
+    height: 80px; /* Adjust size as needed */
+    display: block;
+}
+
+/* Profile Button */
+.profile {
+    background-color: red;
+    padding: 20px;
+    color: white;
+    border-radius: 50%;
+    cursor: pointer;
+    margin: 5px;
+}
+
+.profile:hover{
+    background-color: brown;
+}
+
+.rec-container {
+    max-width: 500px;
+    margin: 50px auto;
+    padding: 30px;
+    text-align: center;
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Button */
+.refresh-btn {
+    width: 50%;
+    padding: 10px;
+    background-color: brown;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.refresh-btn:hover {
+    background-color: #8B0000;
+}
+
+.trend-good { color: green; font-weight: bold; }
+.trend-neutral { color: green; font-weight: bold; }
+.trend-bad { color: red; font-weight: bold; }
+ul {
+    list-style-type: none; 
+    padding-left: 0;        /* Optional: removes indentation */
+    margin-left: 0;
+    margin-top: 10px; 
+    /* padding-left: 20px;  */
+} 
+
+
+/* Footer */
+.footer {
+    background-color: black;
+    color: white;
+    padding: 20px;
+    margin-top: 20px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .navbar {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .nav-links {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .about-container {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .about-container {
+        width: 80%;
+    }
+}
