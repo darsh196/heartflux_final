@@ -196,7 +196,7 @@
                     window.riskChart = new Chart(ctx, {
                         type: "line",
                         data: {
-                            labels: last10.map((_, i) => `#${this.riskHistory.length - last10.length + i + 1} (${new Date(e.timestamp).toLocaleDateString()})`),
+                            labels: last10.map((e, i) => `#${this.riskHistory.length - last10.length + i + 1} (${new Date(e.timestamp).toLocaleDateString()})`),
                             datasets: [{
                                 label: "CVD Risk (%)",
                                 data: last10.map(e => e.value),
