@@ -57,8 +57,6 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 60  # Token expires in 1 hour
 class User(BaseModel):
     name: str
     email: EmailStr
-    age: int
-    gender: str
     password: str
 
 @app.post("/signup")
