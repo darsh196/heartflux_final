@@ -196,7 +196,7 @@
                     window.riskChart = new Chart(ctx, {
                         type: "line",
                         data: {
-                            labels: last10.map((e, i) => `#${this.riskHistory.length - 10 + i + 1} (${new Date(e.timestamp).toLocaleDateString()})`),
+                            labels: last10.map((_, i) => `#${this.riskHistory.length - last10.length + i + 1} (${new Date(e.timestamp).toLocaleDateString()})`),
                             datasets: [{
                                 label: "CVD Risk (%)",
                                 data: last10.map(e => e.value),
@@ -227,7 +227,7 @@
                     window.bpChart = new Chart(ctx, {
                         type: "line",
                         data: {
-                            labels: last10.map((e, i) => `#${this.healthHistory.length - 10 + i + 1}`),
+                            labels: last10.map((_, i) => `#${this.healthHistory.length - last10.length + i + 1}`),
                             datasets: [
                                 {
                                     label: "Systolic BP",
@@ -270,7 +270,7 @@
                     window.weightChart = new Chart(ctx, {
                         type: "line",
                         data: {
-                            labels: last10.map((e, i) => `#${this.healthHistory.length - 10 + i + 1}`),
+                            labels: last10.map((_, i) => `#${this.healthHistory.length - last10.length + i + 1}`),
                             datasets: [{
                                 label: "Weight (kg)",
                                 data: last10.map(e => e.weight),
@@ -299,7 +299,7 @@
                     window.cholChart = new Chart(ctx, {
                         type: "line",
                         data: {
-                            labels: last10.map((e, i) => `#${this.healthHistory.length - 10 + i + 1}`),
+                            labels: last10.map((_, i) => `#${this.healthHistory.length - last10.length + i + 1}`),
                             datasets: [{
                                 label: "Cholesterol (mg/dL)",
                                 data: last10.map(e => e.cholesterol),
@@ -328,7 +328,7 @@
                     window.glucoseChart = new Chart(ctx, {
                         type: "line",
                         data: {
-                            labels: last10.map((e, i) => `#${this.healthHistory.length - 10 + i + 1}`),
+                            labels: last10.map((_, i) => `#${this.healthHistory.length - last10.length + i + 1}`),
                             datasets: [{
                                 label: "Glucose (mmol/L)",
                                 data: last10.map(e => e.glucose),
