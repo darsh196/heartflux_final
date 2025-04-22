@@ -74,8 +74,6 @@ async def signup(user: User):
     users_collection.insert_one({
         "name": user.name,
         "email": user.email,
-        "age": user.age,
-        "gender": user.gender,
         "password": hashed_password
     })
     # Generate JWT token after signup
