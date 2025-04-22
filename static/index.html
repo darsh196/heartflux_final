@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="images/logo.JPG">
+    <title>HeartFlux</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
+    <link rel="stylesheet" href="css/mainpage.css">
+</head>
+<body>
+    <div id="app">
+        <div class='navbar' id="mainNav">
+            <div class="logo">
+                <img src="images/logo.jpg" alt="HeartFlux Logo">
+            </div>
+            <div class="nav-links">
+                <a href="index.html" class = "active">MAIN PAGE</a>
+                <a href="healthdata.html">HEALTH DATA</a>
+                <a href="risk.html">RISK PREDICTIONS</a>
+                <a href="recommendations.html">PERSONAL RECOMMENDATIONS</a>
+                <a href="about.html">ABOUT HEART FLUX</a>
+            </div>
+            <div class="profile">{{ profileInitials }}</div>
+            <button @click="logout" class="logout-btn">Log Out</button>  
+        </div>
+        
+
+        <div class = "greeting">
+            <h1>Welcome to HeartFlux</h1>
+            <h3><i>Your Heart, Your Health, Your Future</i></h3>
+        </div>
+        
+        <div class="main-content">
+            <a href="healthdata.html" class="content-link">
+                <div class="content-box">ENTER YOUR HEALTH DATA</div>
+            </a>
+            <a href="risk.html" class="content-link">
+                <div class="content-box">VIEW PREDICTIONS AND HEALTH TRENDS</div>
+            </a>
+            <a href="recommendations.html" class="content-link">
+                <div class="content-box">VIEW YOUR PERSONAL RECOMMENDATIONS</div>
+            </a>
+        </div>
+        
+        <div class="footer">&copy HeartFlux 2025</div>
+
+    </div>
+    <script>
+        new Vue({
+            el: "#app",
+            data: {
+                profileInitials: "??" // Default initials
+            },
+            methods: {
+                logout() {
+                    localStorage.removeItem("token"); // Remove token
+                    window.location.href = "login.html"; // Redirect to login
+                },
+                checkAuth() {
+                    const token = localStorage.getItem("token");
+                    if (!token) {
+                        window.location.href = "login.html"; // Redirect if not logged in
+                        return;
+                    }
+    
+                    try {
+                        // Decode JWT to extract user info
+                        const decodedToken = jwt_decode(token);
+                        console.log("Decoded Token:", decodedToken); // Debugging: Show the token structure
+    
+                        // Check if the token has a valid structure
+                        if (decodedToken && decodedToken.sub) {
+                            const userName = decodedToken.sub; // Get the username
+                            this.profileInitials = userName.substring(0, 2).toUpperCase(); // Extract first 2 letters
+                            console.log("Profile initials:", this.profileInitials);
+                        } else {
+                            console.error("Invalid token structure:", decodedToken);
+                            window.location.href = "login.html"; // Redirect if token is incorrect
+                        }
+                    } catch (error) {
+                        console.error("Error decoding token:", error);
+                        window.location.href = "login.html"; // Redirect if token is corrupted
+                    }
+                }
+            },
+            created() {
+                this.checkAuth(); // Run authentication check when page loads
+            }
+        });
+    </script>   
+</body>
+</html>

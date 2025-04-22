@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="images/logo.JPG">
+    <title>About - HeartFlux</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
+    <link rel="stylesheet" href="css/about.css">
+</head>
+<body>
+    <div id="app">
+        <div class="navbar">
+            <div class="logo">
+                <img src="images/logo.jpg" alt="HeartFlux Logo">
+            </div>
+            <div class="nav-links">
+                <a href="index.html">MAIN PAGE</a>
+                <a href="healthdata.html">HEALTH DATA</a>
+                <a href="risk.html">RISK PREDICTIONS</a>
+                <a href="recommendations.html">PERSONAL RECOMMENDATIONS</a>
+                <a href="#"  class="active">ABOUT HEART FLUX</a>
+            </div>
+            <div class="profile">{{ profileInitials }}</div>
+            <button @click="logout" class="logout-btn">Log Out</button>  
+        </div>
+
+        <div class="about-container">
+            <h2>About HeartFlux</h2>
+            <p>
+                <strong>HeartFlux</strong> is a modern and intelligent health platform designed to help you assess and monitor your cardiovascular health.
+                It combines cutting-edge web development with powerful machine learning models.
+            </p>
+    
+            <p>
+                The system allows you to submit and update key health metrics such as blood pressure, cholesterol, glucose level, and lifestyle habits.
+                We then predict your cardiovascular disease risk and monitor changes over time to update your risk levels.
+            </p>
+    
+            <p>
+                Personalized health recommendations are generated based on risk level and lifestyle, helping you take actionable steps toward better heart health.
+            </p>
+    
+            <p>
+                The goal of HeartFlux is simple: <em>Enable people everywhere to take control of their heart health using data-driven insights.</em>
+                Whether you're proactively monitoring your health or managing existing risks, HeartFlux is your intelligent companion for a healthier future.
+            </p>
+    
+            <p class="tagline" style="text-align:center;"><strong><i>HeartFlux – Your Heart, Your Health, Your Future.</i></strong></p>
+        </div>
+        <div class="footer">&copy HeartFlux 2025</div>
+    </div>
+    <script>
+        new Vue({
+            el: "#app",
+            data: {
+                profileInitials: "??" // Default initials
+            },
+            methods: {
+                logout() {
+                    localStorage.removeItem("token"); // Remove token
+                    window.location.href = "login.html"; // Redirect to login
+                },
+                checkAuth() {
+                    const token = localStorage.getItem("token");
+                    if (!token) {
+                        window.location.href = "login.html"; // Redirect if not logged in
+                        return;
+                    }
+    
+                    try {
+                        // Decode JWT to extract user info
+                        const decodedToken = jwt_decode(token);
+                        console.log("Decoded Token:", decodedToken); // Debugging: Show the token structure
+    
+                        // Check if the token has a valid structure
+                        if (decodedToken && decodedToken.sub) {
+                            const userName = decodedToken.sub; // Get the username
+                            this.profileInitials = userName.substring(0, 2).toUpperCase(); // Extract first 2 letters
+                        } else {
+                            console.error("Invalid token structure:", decodedToken);
+                            window.location.href = "login.html"; // Redirect if token is incorrect
+                        }
+                    } catch (error) {
+                        console.error("Error decoding token:", error);
+                        window.location.href = "login.html"; // Redirect if token is corrupted
+                    }
+                }
+            },
+            created() {
+                this.checkAuth(); // Run authentication check when page loads
+            }
+        });
+    </script>
+
+</body>

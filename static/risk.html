@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="images/logo.JPG">
+    <title>Risk Prediction - HeartFlux</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="css/risk.css">
+</head>
+<body>
+    <div id="app">
+        <div class="navbar">
+            <div class="logo">
+                <img src="images/logo.jpg" alt="HeartFlux Logo">
+            </div>
+            <div class="nav-links">
+                <a href="index.html">MAIN PAGE</a>
+                <a href="healthdata.html">HEALTH DATA</a>
+                <a href="#" class="active">RISK PREDICTIONS</a>
+                <a href="recommendations.html">PERSONAL RECOMMENDATIONS</a>
+                <a href="about.html">ABOUT HEART FLUX</a>
+            </div>
+            <div class="profile">{{ profileInitials }}</div>
+            <button @click="logout" class="logout-btn">Log Out</button>  
+        </div>
+
+        <div class="risk-container">
+            <h2>Your Cardiovascular Risk</h2>
+            <button @click="getRisk" class="risk-btn" :disabled="loading">{{ loading ? 'Analyzing...' : 'Get My Risk Prediction' }}</button>
+            <div class="result" v-if="riskPercent !== null">
+                <p>Your risk of cardiovascular disease is <strong>{{ riskPercent.toFixed(1) }}%</strong>.</p>
+            </div>
+            <div class="result" v-if="errorMessage">
+                <p style="color: red;">{{ errorMessage }}</p>
+            </div>
+            <h3>Feature Contributions</h3>
+            <p style="font-weight: bold; margin-top: 20px;">
+                <span style="color: red;">Red bars</span> → Negative influence (reduced your predicted risk)<br>
+                <span style="color: green;">Green bars</span> → Positive influence (increased your predicted risk)
+            </p>
+            <canvas id="shapChart" width="400" height="300"></canvas>
+
+            <!-- Charts -->
+            <div v-if="riskHistory.length > 0 || healthHistory.length > 0" class="chart-section">
+                <h3>Risk Prediction History</h3>
+                <canvas id="riskChart" width="400" height="200"></canvas>
+
+                <h3 style="margin-top:40px;">Blood Pressure Trend</h3>
+                <canvas id="bpChart" width="400" height="200"></canvas>
+                <h3 style="margin-top:40px;">Weight Over Time</h3>
+                <canvas id="weightChart" width="400" height="200"></canvas>
+
+                <h3 style="margin-top:40px;">Cholesterol Trend (mg/dL)</h3>
+                <canvas id="cholChart" width="400" height="200"></canvas>
+
+                <h3 style="margin-top:40px;">Glucose Trend (mmol/L)</h3>
+                <canvas id="glucoseChart" width="400" height="200"></canvas>
+
+            </div>
+        </div>
+        <div class="footer">&copy HeartFlux 2025</div>
+    </div>
+    <script>
+        new Vue({
+            el: "#app",
+            data: {
+                profileInitials: "??", // Default initials
+                riskPercent: null,
+                riskHistory: [],
+                healthHistory: [],
+                loading: false,
+                errorMessage: "" // ✅ Add this line
+            },
+            methods: {
+                logout() {
+                    localStorage.removeItem("token"); // Remove token
+                    window.location.href = "login.html"; // Redirect to login
+                },
+                checkAuth() {
+                    const token = localStorage.getItem("token");
+                    if (!token) {
+                        window.location.href = "login.html"; // Redirect if not logged in
+                        return;
+                    }
+    
+                    try {
+                        // Decode JWT to extract user info
+                        const decodedToken = jwt_decode(token);
+                        console.log("Decoded Token:", decodedToken); // Debugging: Show the token structure
+    
+                        // Check if the token has a valid structure
+                        if (decodedToken && decodedToken.sub) {
+                            const userName = decodedToken.sub; // Get the username
+                            this.profileInitials = userName.substring(0, 2).toUpperCase(); // Extract first 2 letters
+                        } else {
+                            console.error("Invalid token structure:", decodedToken);
+                            window.location.href = "login.html"; // Redirect if token is incorrect
+                        }
+                    } catch (error) {
+                        console.error("Error decoding token:", error);
+                        window.location.href = "login.html"; // Redirect if token is corrupted
+                    }
+                },
+                async getRisk() {
+                    const token = localStorage.getItem("token");
+                    if (!token) {
+                        window.location.href = "login.html";
+                        return;
+                    }
+
+                    this.loading = true;
+                    this.errorMessage = "";
+                    this.riskPercent = null;
+
+                    try {
+                        const response = await axios.get("http://127.0.0.1:8000/predict-risk", {
+                            headers: {
+                                Authorization: `Bearer ${token}`
+                            }
+                        });
+                        this.riskPercent = response.data.risk_percent;
+
+                        // ✅ Only render SHAP chart if data is available
+                        const shapData = response.data.shap_contributions;
+                        if (shapData && typeof shapData === 'object') {
+                            const rawLabels = Object.keys(shapData);
+                            const values = Object.values(shapData);
+
+                            // Mapping of feature names to more human-readable labels
+                            const displayNames = {
+                                age: "Age",
+                                gender: "Gender",
+                                height: "Height",
+                                weight: "Weight",
+                                ap_hi: "Systolic BP",
+                                ap_lo: "Diastolic BP",
+                                cholesterol: "Cholesterol Level",
+                                gluc: "Glucose Level",
+                                smoke: "Smoking Status",
+                                alco: "Alcohol Consumption",
+                                active: "Physical Activity"
+                            };
+
+                            // Convert raw labels into readable ones
+                            const formattedLabels = rawLabels.map(key => displayNames[key] || key);
+                            this.renderShapChart(formattedLabels, values);
+                        } else {
+                            console.warn("SHAP contributions not received from server.");
+                        }
+
+                        this.fetchHistories();
+                    } catch (error) {
+                        console.error("Prediction error:", error);
+                        this.errorMessage = error.response?.data?.detail || "Failed to get prediction.";
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+                async fetchHistories() {
+                    const token = localStorage.getItem("token");
+
+                    const [riskRes, healthRes] = await Promise.all([
+                        axios.get("http://127.0.0.1:8000/risk-history", {
+                            headers: { Authorization: `Bearer ${token}` }
+                        }),
+                        axios.get("http://127.0.0.1:8000/health-history", {
+                            headers: { Authorization: `Bearer ${token}` }
+                        })
+                    ]);
+
+                    this.riskHistory = riskRes.data.history;
+                    this.healthHistory = healthRes.data.history;
+
+                    this.$nextTick(() => {
+                        this.renderRiskChart();
+                        this.renderBPChart();
+                        this.renderCholChart();
+                        this.renderGlucoseChart();
+                        this.renderWeightChart();
+                    });
+                },
+                renderRiskChart() {
+                    const ctx = document.getElementById("riskChart")?.getContext("2d");
+                    if (!ctx) return;
+
+                    if (window.riskChart instanceof Chart) {
+                        window.riskChart.destroy();
+                    }
+
+                    const last10 = this.riskHistory.slice(-10);
+
+                    window.riskChart = new Chart(ctx, {
+                        type: "line",
+                        data: {
+                            labels: last10.map((e, i) => `#${this.riskHistory.length - 10 + i + 1} (${new Date(e.timestamp).toLocaleDateString()})`),
+                            datasets: [{
+                                label: "CVD Risk (%)",
+                                data: last10.map(e => e.value),
+                                borderColor: "red",
+                                backgroundColor: "rgba(255, 0, 0, 0.1)",
+                                fill: true,
+                                tension: 0.3
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            scales: {
+                                y: { beginAtZero: true, max: 100 }
+                            }
+                        }
+                    });
+                },
+
+                renderBPChart() {
+                    const ctx = document.getElementById("bpChart")?.getContext("2d");
+                    if (!ctx) return;
+
+                    if (window.bpChart instanceof Chart) {
+                        window.bpChart.destroy();
+                    }
+                    const last10 = this.healthHistory.slice(-10);
+
+                    window.bpChart = new Chart(ctx, {
+                        type: "line",
+                        data: {
+                            labels: last10.map((e, i) => `#${this.healthHistory.length - 10 + i + 1}`),
+                            datasets: [
+                                {
+                                    label: "Systolic BP",
+                                    data: last10.map(e => e.systolic_bp),
+                                    borderColor: "blue",
+                                    backgroundColor: "rgba(0, 0, 255, 0.1)",
+                                    fill: false,
+                                    tension: 0.3
+                                },
+                                {
+                                    label: "Diastolic BP",
+                                    data: last10.map(e => e.diastolic_bp),
+                                    borderColor: "green",
+                                    backgroundColor: "rgba(0, 255, 0, 0.1)",
+                                    fill: false,
+                                    tension: 0.3
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            scales: {
+                                y: {
+                                    beginAtZero: false,
+                                    suggestedMin: 60,
+                                    suggestedMax: 180
+                                }
+                            }
+                        }
+                    });
+                },
+                renderWeightChart() {
+                    const ctx = document.getElementById("weightChart")?.getContext("2d");
+                    if (!ctx) return;
+
+                    if (window.weightChart instanceof Chart) window.weightChart.destroy();
+
+                    const last10 = this.healthHistory.slice(-10);
+
+                    window.weightChart = new Chart(ctx, {
+                        type: "line",
+                        data: {
+                            labels: last10.map((e, i) => `#${this.healthHistory.length - 10 + i + 1}`),
+                            datasets: [{
+                                label: "Weight (kg)",
+                                data: last10.map(e => e.weight),
+                                borderColor: "orange",
+                                backgroundColor: "rgba(255, 165, 0, 0.2)",
+                                fill: true,
+                                tension: 0.3
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            scales: {
+                                y: { beginAtZero: false }
+                            }
+                        }
+                    });
+                }, 
+                renderCholChart() {
+                    const ctx = document.getElementById("cholChart")?.getContext("2d");
+                    if (!ctx) return;
+
+                    if (window.cholChart instanceof Chart) window.cholChart.destroy();
+
+                    const last10 = this.healthHistory.slice(-10);
+
+                    window.cholChart = new Chart(ctx, {
+                        type: "line",
+                        data: {
+                            labels: last10.map((e, i) => `#${this.healthHistory.length - 10 + i + 1}`),
+                            datasets: [{
+                                label: "Cholesterol (mg/dL)",
+                                data: last10.map(e => e.cholesterol),
+                                borderColor: "purple",
+                                backgroundColor: "rgba(128, 0, 128, 0.2)",
+                                fill: true,
+                                tension: 0.3
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            scales: {
+                                y: { beginAtZero: false }
+                            }
+                        }
+                    });
+                },
+                renderGlucoseChart() {
+                    const ctx = document.getElementById("glucoseChart")?.getContext("2d");
+                    if (!ctx) return;
+
+                    if (window.glucoseChart instanceof Chart) window.glucoseChart.destroy();
+
+                    const last10 = this.healthHistory.slice(-10);
+
+                    window.glucoseChart = new Chart(ctx, {
+                        type: "line",
+                        data: {
+                            labels: last10.map((e, i) => `#${this.healthHistory.length - 10 + i + 1}`),
+                            datasets: [{
+                                label: "Glucose (mmol/L)",
+                                data: last10.map(e => e.glucose),
+                                borderColor: "teal",
+                                backgroundColor: "rgba(0, 128, 128, 0.2)",
+                                fill: true,
+                                tension: 0.3
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            scales: {
+                                y: { beginAtZero: false }
+                            }
+                        }
+                    });
+                },
+                renderShapChart(labels, values) {
+                    const ctx = document.getElementById("shapChart")?.getContext("2d");
+                    if (!ctx) return;
+
+                    if (window.shapChart instanceof Chart) {
+                        window.shapChart.destroy();
+                    }
+
+                    window.shapChart = new Chart(ctx, {
+                        type: "bar",
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: "SHAP Contribution",
+                                data: values,
+                                backgroundColor: values.map(v => v >= 0 ? "rgba(0, 200, 0, 0.6)" : "rgba(255, 0, 0, 0.6)"),
+                                borderColor: values.map(v => v >= 0 ? "green" : "red"),
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            indexAxis: 'y',
+                            responsive: true,
+                            plugins: {
+                                legend: { display: false },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            return `Impact: ${context.raw}`;
+                                        }
+                                    }
+                                }
+                            },
+                            scales: {
+                                x: {
+                                    beginAtZero: true,
+                                    title: {
+                                        display: true,
+                                        text: 'Contribution to Risk (%)'
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+            },
+            created() {
+                this.checkAuth(); // Run authentication check when page loads
+                this.fetchHistories();
+            }
+        });
+    </script>
+
+</body>

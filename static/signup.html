@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="images/logo.JPG">
+    <title>Sign Up - HeartFlux</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <link rel="stylesheet" href="css/signup.css">
+</head>
+<body>
+    <div id="app">
+        <div class="signup-container">
+            <h1>WELCOME TO HEARTFLUX</h1>
+            <h2>Sign-Up</h2>
+            <form @submit.prevent="registerUser">
+                <input type="text" v-model="name" placeholder="Enter username" required>
+                <input type="email" v-model="email" placeholder="Enter your email address" required>
+                <input type="number" v-model="age" placeholder="Enter your age" required>
+                <select v-model="gender" required>
+                    <option value="" disabled selected>Enter your gender</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                    <option value="other">Other</option>
+                </select>
+                <input type="password" v-model="password" placeholder="Enter your password" required>
+                <input type="password" v-model="confirmPassword" placeholder="Enter confirm password" required>
+                <p v-if="passwordMismatch" class="error-message">Passwords do not match</p>
+                <button type="submit" :disabled="passwordMismatch">Sign Up</button>
+            </form>
+            <p>Already have an account? <a href="login.html"><b>Click here</b></a></p>
+        </div>
+    </div>
+
+    <script>
+        new Vue({
+            el: "#app",
+            data: {
+                name: "",
+                email: "",
+                age: "",
+                gender: "",
+                password: "",
+                confirmPassword: ""
+            },
+            computed: {
+                passwordMismatch() {
+                    return this.password !== this.confirmPassword && this.confirmPassword.length > 0;
+                }
+            },
+            methods: {
+                async registerUser() {
+                    try {
+                        const response = await axios.post("http://127.0.0.1:8000/signup", {
+                            name: this.name,
+                            email: this.email,
+                            age: this.age,
+                            gender: this.gender,
+                            password: this.password
+                        });
+                        console.log("Signup Successful, Token:", response.data.access_token); // Debugging
+
+                        // Store JWT token in localStorage
+                        localStorage.setItem("token", response.data.access_token);
+
+                        // Redirect to index.html after successful signup
+                        window.location.href = "index.html";
+
+
+                    } catch (error) {
+                        alert("Error: " + error.response.data.detail);
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

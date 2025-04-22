@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="images/logo.JPG">
+    <title>Recommendations - HeartFlux</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
+    <link rel="stylesheet" href="css/recommendations.css">
+</head>
+<body>
+    <div id="app">
+        <div class="navbar">
+            <div class="logo">
+                <img src="images/logo.jpg" alt="HeartFlux Logo">
+            </div>
+            <div class="nav-links">
+                <a href="index.html">MAIN PAGE</a>
+                <a href="healthdata.html">HEALTH DATA</a>
+                <a href="risk.html">RISK PREDICTIONS</a>
+                <a href="#" class="active">PERSONAL RECOMMENDATIONS</a>
+                <a href="about.html">ABOUT HEART FLUX</a>
+            </div>
+            <div class="profile">{{ profileInitials }}</div>
+            <button @click="logout" class="logout-btn">Log Out</button>  
+        </div>
+        <div v-if="loading">Loading recommendations...</div>
+        <div v-else>
+        <div class = "rec-container">
+            <p>Your cardiovascular risk trend is:
+                <span
+                    :class="{
+                    'trend-good': trend === 'improving',
+                    'trend-neutral': trend === 'stable',
+                    'trend-bad': trend === 'worsening'
+                    }"
+                >
+                    {{ trend.toUpperCase() }} 
+                </span>
+            </p>
+            <button @click="fetchRecommendations" class="refresh-btn">
+                Refresh Recommendations
+            </button>
+            
+            <h3>Recommended Actions:</h3>
+            <ul>
+                <li v-for="rec in recommendations">{{ rec }}</li>
+            </ul>
+        </div>
+        </div>
+        <div class="footer">&copy HeartFlux 2025</div>
+    </div>
+    <script>
+        new Vue({
+            el: "#app",
+            data: {
+                confidence: 0,
+                trend: "",
+                recommendations: [],
+                profileInitials: "??", // Default initials
+                loading:true
+            },
+            methods: {
+                logout() {
+                    localStorage.removeItem("token"); // Remove token
+                    window.location.href = "login.html"; // Redirect to login
+                },
+                checkAuth() {
+                    const token = localStorage.getItem("token");
+                    if (!token) {
+                        window.location.href = "login.html"; // Redirect if not logged in
+                        return;
+                    }
+    
+                    try {
+                        // Decode JWT to extract user info
+                        const decodedToken = jwt_decode(token);
+                        console.log("Decoded Token:", decodedToken); // Debugging: Show the token structure
+    
+                        // Check if the token has a valid structure
+                        if (decodedToken && decodedToken.sub) {
+                            const userName = decodedToken.sub; // Get the username
+                            this.profileInitials = userName.substring(0, 2).toUpperCase(); // Extract first 2 letters
+                            this.fetchRecommendations();
+                        } else {
+                            console.error("Invalid token structure:", decodedToken);
+                            window.location.href = "login.html"; // Redirect if token is incorrect
+                        }
+                    } catch (error) {
+                        console.error("Error decoding token:", error);
+                        window.location.href = "login.html"; // Redirect if token is corrupted
+                    }
+                },
+                fetchRecommendations() {
+                    const token = localStorage.getItem("token");
+                    axios.get("http://127.0.0.1:8000/recommendations", {
+                        headers: {
+                        Authorization: `Bearer ${token}`
+                        }
+                    }).then(res => {
+                        this.trend = res.data.trend;
+                        this.confidence = res.data.confidence;
+                        this.recommendations = res.data.recommendations;
+                        this.loading = false;
+                    }).catch(err => {
+                        this.loading = false;
+                        alert("Error fetching recommendations.");
+                        console.error(err);
+                    });
+                }
+            },
+            created() {
+                this.checkAuth(); // Run authentication check when page loads
+            }
+        });
+    </script>
+
+</body>

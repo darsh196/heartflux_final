@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="images/logo.JPG">
+    <title>Health Data - HeartFlux</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
+    <link rel="stylesheet" href="css/healthdata.css">
+</head>
+<body>
+    <div id="app">
+        <div class="navbar">
+            <div class="logo">
+                <img src="images/logo.jpg" alt="HeartFlux Logo">
+            </div>
+            <div class="nav-links">
+                <a href="index.html">MAIN PAGE</a>
+                <a href="#" class="active">HEALTH DATA</a>
+                <a href="risk.html">RISK PREDICTIONS</a>
+                <a href="recommendations.html">PERSONAL RECOMMENDATIONS</a>
+                <a href="about.html">ABOUT HEART FLUX</a>
+            </div>
+            <div class="profile">{{ profileInitials }}</div>
+            <button @click="logout" class="logout-btn">Log Out</button>  
+        </div>
+
+        <div class="form-container">
+            <h2>Enter Your Health Data</h2>
+            <h5>Fields from your last data entry has already been filled for you! Modify them based on your latest parameters.</h5>
+            <h5>If this is your first time, please fill out the form below.</h5>
+            <form @submit.prevent="submitHealthData">
+                <p>Age:</p>
+                <input type="number" v-model="age" placeholder="Age" required>
+                <p>Gender:</p>
+                <select v-model="gender" required>
+                    <option disabled value="">Select Gender</option>
+                    <option>Male</option>
+                    <option>Female</option>
+                </select>
+                <p>Height (in cm):</p>
+                <input type="number" v-model="height" placeholder="Height (in cm)" required>
+                <p>Weight (in kg):</p>
+                <input type="number" v-model="weight" placeholder="Weight (in kg)" required>
+                <!-- "How to read BP?" button -->
+                <button type="button" @click="showBPDialog = true" class="info-btn">How to read BP?</button>
+
+                <!-- Dialog -->
+                <div v-if="showBPDialog" class="dialog-overlay" @click.self="showBPDialog = false">
+                    <div class="dialog-box">
+                        <img src="images/bp_diagram.jpeg" alt="How to read BP" class="bp-diagram">
+                        <button class="close-btn" @click="showBPDialog = false">Close</button>
+                    </div>
+                </div>
+                <p>Systolic BP:</p>
+                <input type="number" v-model="systolicBP" placeholder="Systolic BP" required>
+                <p>Diastolic BP:</p>
+                <input type="number" v-model="diastolicBP" placeholder="Diastolic BP" required>
+                <h5>Please insert your latest cholesterol level. If you never had a cholesterol test, write 150 (normal level)</h5>
+                <p>Total Cholesterol (mg/dL):</p>
+                <input type="number" v-model="cholesterol" placeholder="Total Cholesterol (mg/dL)" required>
+                <h5>Please insert your latest glucose level. If you never had a glucose test, write 5 (normal level)</h5>
+                <p>Glucose (mmol/L):</p>
+                <input type="number" v-model="glucose" placeholder="Glucose (mmol/L)" required>
+                <p>Do you smoke?</p>
+                <select v-model="smoker" required>
+                    <option disabled value="">Current smoker</option>
+                    <option>Yes</option>
+                    <option>No</option>
+                </select>
+
+                <!-- Alcohol intake -->
+                <p>Do you consume alcohol?</p>
+                <select v-model="alcohol" required>
+                    <option disabled value="">Alcohol Consumption</option>
+                    <option>Yes</option>
+                    <option>No</option>
+                </select>
+
+                <!-- Physical activity -->
+                <p>Are you physically active?</p>
+                <select v-model="activity" required>
+                    <option disabled value="">Physical Activity Status</option>
+                    <option>Active</option>
+                    <option>Not Active</option>
+                </select>
+                
+                <button type="submit" class="submit">Submit</button>
+            </form>
+            <p v-if="message" class="success-msg">{{ message }}</p>
+            <p v-if="countdownMessage" class="redirect-msg">{{ countdownMessage }}</p>
+        </div>
+        <div class="footer">&copy HeartFlux 2025</div>
+    </div>
+
+    <script>
+        new Vue({
+            el: "#app",
+            data: {
+                age: "",
+                gender: "",
+                height: "",
+                weight: "",
+                systolicBP: "",
+                diastolicBP: "",
+                cholesterol: "",
+                glucose: "",
+                smoker: "",
+                alcohol: "",
+                activity: "",
+                message: "",
+                countdownMessage: "",
+                profileInitials: "??",
+                countdown: 5,
+                showBPDialog: false
+            },
+            methods: {
+                logout() {
+                    localStorage.removeItem("token"); // Remove token
+                    window.location.href = "login.html"; // Redirect to login
+                },
+                loadLastHealthEntry() {
+                    const token = localStorage.getItem("token");
+                    if (!token) return;
+
+                    axios.get("http://127.0.0.1:8000/health-history", {
+                        headers: {
+                            Authorization: `Bearer ${token}`
+                        }
+                    }).then(response => {
+                        const history = response.data.history;
+                        if (history.length > 0) {
+                            const latest = history[history.length - 1]; // Most recent entry
+                            this.age = latest.age;
+                            this.gender = latest.gender;
+                            this.height = latest.height;
+                            this.weight = latest.weight;
+                            this.systolicBP = latest.systolic_bp;
+                            this.diastolicBP = latest.diastolic_bp;
+                            this.cholesterol = latest.cholesterol;
+                            this.glucose = latest.glucose;
+                            this.smoker = latest.smoker;
+                            this.alcohol = latest.alcohol;
+                            this.activity = latest.activity;
+                        }
+                    }).catch(error => {
+                        console.error("Error loading past health data:", error);
+                    });
+                },
+                submitHealthData() {
+                    const token = localStorage.getItem("token");
+                    if (!token) {
+                        window.location.href = "login.html";
+                        return;
+                    }
+
+                    axios.post("http://127.0.0.1:8000/submit-health-data", {
+                        age: this.age,
+                        gender: this.gender,
+                        height: this.height,
+                        weight: this.weight,
+                        systolic_bp: this.systolicBP,
+                        diastolic_bp: this.diastolicBP,
+                        cholesterol: this.cholesterol,
+                        glucose: this.glucose,
+                        smoker: this.smoker,
+                        alcohol: this.alcohol,
+                        activity: this.activity
+                    }, {
+                        headers: {
+                            Authorization: `Bearer ${token}`
+                        }
+                    }).then(response => {
+                        this.message = "Health data submitted successfully!";
+                        this.countdownMessage = "Redirecting in 5 seconds...";
+                        let countdown = 5;
+
+                        const interval = setInterval(() => {
+                            countdown--;
+                            this.countdownMessage = `Redirecting in ${countdown} seconds...`;
+
+                            if (countdown <= 0) {
+                                clearInterval(interval);
+                                window.location.href = "risk.html";
+                            }
+                        }, 1000);
+                        Object.assign(this.$data, this.$options.data());
+                    }).catch(error => {
+                        console.error("Error submitting data:", error);
+                        this.message = "Submission failed. Please try again.";
+                    });
+                },
+                checkAuth() {
+                    const token = localStorage.getItem("token");
+                    if (!token) {
+                        window.location.href = "login.html";
+                        return;
+                    }
+
+                    try {
+                        const decoded = jwt_decode(token);
+                        this.profileInitials = decoded.sub.substring(0, 2).toUpperCase();
+                    } catch (e) {
+                        window.location.href = "login.html";
+                    }
+                }
+            },
+            created() {
+                this.checkAuth();
+                this.loadLastHealthEntry();
+            }
+        });
+    </script>
+</body>
+</html>
