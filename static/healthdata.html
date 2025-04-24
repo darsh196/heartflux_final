@@ -43,7 +43,7 @@
                 <p>Height (in cm):</p>
                 <input type="number" v-model="height" placeholder="Height (in cm)" required>
                 <p>Weight (in kg):</p>
-                <input type="number" v-model="weight" placeholder="Weight (in kg)" required>
+                <input type="number" v-model="weight" placeholder="Weight (in kg)" step="0.1" required>
                 <!-- "How to read BP?" button -->
                 <button type="button" @click="showBPDialog = true" class="info-btn">How to read BP?</button>
 
@@ -63,7 +63,7 @@
                 <input type="number" v-model="cholesterol" placeholder="Total Cholesterol (mg/dL)" required>
                 <h5>Please insert your latest glucose level. If you never had a glucose test, write 5 (normal level)</h5>
                 <p>Glucose (mmol/L):</p>
-                <input type="number" v-model="glucose" placeholder="Glucose (mmol/L)" required>
+                <input type="number" v-model="glucose" placeholder="Glucose (mmol/L)" step="0.1" required>
                 <p>Do you smoke?</p>
                 <select v-model="smoker" required>
                     <option disabled value="">Current smoker</option>
