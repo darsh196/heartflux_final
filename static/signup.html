@@ -18,10 +18,10 @@
                 <input type="text" v-model="name" placeholder="Enter username" required>
                 <input type="email" v-model="email" placeholder="Enter your email address" required>
                 <input type="password" v-model="password" placeholder="Enter your password" required>
+                <p v-if="invalidPassword" class="error-message">{{ passwordError }}</p> 
                 <input type="password" v-model="confirmPassword" placeholder="Enter confirm password" required>
-                <p v-if="invalidPassword" class="error-message">{{ passwordError }}</p>
                 <p v-if="passwordMismatch" class="error-message">Passwords do not match</p>
-                <button type="submit" :disabled="passwordMismatch">Sign Up</button>
+                <button type="submit" :disabled="passwordMismatch || invalidPassword">Sign Up</button>
             </form>
             <p>Already have an account? <a href="login.html"><b>Click here</b></a></p>
         </div>
@@ -63,6 +63,9 @@
             },
             methods: {
                 async registerUser() {
+                    if (this.invalidPassword || this.passwordMismatch) {
+                        return; // Prevent submission if invalid
+                    }
                     try {
                         const response = await axios.post("https://heartflux.onrender.com/signup", {
                             name: this.name,
