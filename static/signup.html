@@ -19,6 +19,7 @@
                 <input type="email" v-model="email" placeholder="Enter your email address" required>
                 <input type="password" v-model="password" placeholder="Enter your password" required>
                 <input type="password" v-model="confirmPassword" placeholder="Enter confirm password" required>
+                <p v-if="invalidPassword" class="error-message">{{ passwordError }}</p>
                 <p v-if="passwordMismatch" class="error-message">Passwords do not match</p>
                 <button type="submit" :disabled="passwordMismatch">Sign Up</button>
             </form>
@@ -38,6 +39,25 @@
             computed: {
                 passwordMismatch() {
                     return this.password !== this.confirmPassword && this.confirmPassword.length > 0;
+                },
+                invalidPassword() {
+                    // Check length
+                    if (this.password.length < 6) {
+                        this.passwordError = "Password must be at least 6 characters long.";
+                        return true;
+                    }
+                    // Check for at least one letter
+                    if (!/[a-zA-Z]/.test(this.password)) {
+                        this.passwordError = "Password must include at least one letter.";
+                        return true;
+                    }
+                    // Check for at least one number
+                    if (!/\d/.test(this.password)) {
+                        this.passwordError = "Password must include at least one number.";
+                        return true;
+                    }
+                    this.passwordError = "";
+                    return false;
                 }
             },
             methods: {
