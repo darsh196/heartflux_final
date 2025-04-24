@@ -106,7 +106,7 @@
                         this.loading = false;
                     }).catch(err => {
                         this.loading = false;
-                        alert("Error fetching recommendations.");
+                        alert("Error fetching recommendations. You need 5 health data entries and 5 risk predictions to view this page.");
                         console.error(err);
                     });
                 }
