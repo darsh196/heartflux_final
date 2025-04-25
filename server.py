@@ -101,7 +101,7 @@ async def login(user: UserLogin):
 
     # Verify password
     if not pwd_context.verify(user.password, db_user["password"]):
-        raise HTTPException(status_code=400, detail="Invalid email or password")
+        raise HTTPException(status_code=400, detail="Invalid username or password")
     
     # Generate JWT token
     access_token = create_access_token(
@@ -191,7 +191,7 @@ def predict_risk(username: str = Depends(get_current_user)):
     # ≥7.0 → 3
     glucose_cat = 1 if latest["glucose"] < 5.6 else 2 if latest["glucose"] < 7.0 else 3
 
-    # Gender: female = 1, male = 2 (as per your model)
+    # Gender: female = 1, male = 2 
     gender_code = 2 if latest["gender"].lower() == "male" else 1
 
     features = pd.DataFrame([{
